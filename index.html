@@ -499,9 +499,11 @@ function renderHeatmap(){
   trains=trains.filter(t=>getTrainSummary(t)!=='hidden');
 
   const availW=document.getElementById('heatmap-card').clientWidth||900;
-  const BASE_DAYS=14;
-  const cellW=dates.length<=BASE_DAYS?Math.floor((availW-160)/dates.length):Math.floor((availW-160)/BASE_DAYS);
-  const tableW=Math.max(availW-2, 160+cellW*dates.length);
+  const CELL_W=36; // 기간에 상관없이 셀 너비 고정
+  const fixedCols=160; // 편성+요약 열 너비
+  // 14일 이하일 땐 남은 공간을 균등 분배, 초과 시 고정 셀 크기
+  const cellW=dates.length<=14?Math.max(CELL_W,Math.floor((availW-fixedCols)/dates.length)):CELL_W;
+  const tableW=Math.max(availW-2, fixedCols+cellW*dates.length);
 
   let hh=`<tr><th style="width:80px;min-width:80px;">편성 / 위치</th><th style="width:80px;min-width:80px;">요약(14일)</th>`;
   dates.forEach(d=>{hh+=`<th style="width:${cellW}px;min-width:${cellW}px;">${fmtShort(d)}</th>`;});
@@ -856,8 +858,8 @@ function openModal(id){document.getElementById(id).classList.add('show');if(id==
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function toggleSearch(){const sb=document.getElementById('search-bar');sb.style.display=sb.style.display==='none'?'flex':'none';}
 function clearSearch(){document.getElementById('srchTrain').value='';document.getElementById('srchLoc').value='';document.getElementById('srchContent').value='';document.getElementById('srchStatus').value='';render();}
-function setPeriod(days){const today=new Date();const start=new Date(today);start.setDate(start.getDate()-days+1);document.getElementById('sDate').value=start.toISOString().split('T')[0];document.getElementById('eDate').value=today.toISOString().split('T')[0];document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pb'+days).classList.add('active');render();}
-function clearPeriodActive(){document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));}
+function setPeriod(days){const today=new Date();const start=new Date(today);start.setDate(start.getDate()-days+1);document.getElementById('sDate').value=start.toISOString().split('T')[0];document.getElementById('eDate').value=today.toISOString().split('T')[0];document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pb'+days).classList.add('active');document.getElementById('heatmap-card').scrollLeft=0;render();}
+function clearPeriodActive(){document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));document.getElementById('heatmap-card').scrollLeft=0;}
 
 function render(){renderLegendBar();renderFilters();renderHeatmap();if(selTrain) renderSummary();}
 async function reloadAndRender(){await loadDB();render();}
