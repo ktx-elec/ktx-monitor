@@ -205,7 +205,10 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 </head>
 <body>
 <div id="header">
-  <span class="title">🚄 고속차량 정비이력 모니터링</span>
+  <div style="display:flex;flex-direction:column;gap:1px;">
+    <span class="title">🚄 고속차량 정비이력 모니터링</span>
+    <span style="font-size:10px;color:var(--txt3);letter-spacing:.2px;">(부산철도차량정비단 경정비전기부)</span>
+  </div>
   <div class="fleet-filter-btns">
     <button class="fleet-btn fleet-btn-ktx active" id="fleetKTX" onclick="setFleetFilter('KTX')">KTX</button>
     <button class="fleet-btn fleet-btn-sr" id="fleetSR" onclick="setFleetFilter('SR')">SR</button>
@@ -237,7 +240,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
   <button class="icon-btn" title="통계" onclick="openModal('statModal')">📊</button>
   <button class="icon-btn admin-only" id="csvBtn" title="CSV 가져오기/내보내기" onclick="openModal('csvModal')">📥</button>
   <button class="icon-btn admin-only" id="setupBtn" title="시스템 설정" onclick="openModal('admModal')">⚙️</button>
-  <button class="icon-btn" title="새로고침" onclick="render()">⟳</button>
+  <button class="icon-btn" title="새로고침" onclick="reloadAndRender()">⟳</button>
   <button class="admin-btn" id="adminBtnHdr" onclick="handleAdminBtn()">🔒 관리자</button>
 </div>
 <div id="search-bar" style="display:none">
@@ -286,7 +289,7 @@ const INITIAL={
     {key:'auto',    name:'자동차단', color:'#ef4444'}, // 붉은색
     {key:'warning', name:'요주의',   color:'#eab308'},
     {key:'normal',  name:'정상',     color:'#22c55e'},
-    {key:'complete',name:'조치완료', color:'#51cf66'},
+    {key:'complete',name:'주기검수', color:'#3b82f6'},
     {key:'nodata',  name:'데이터없음',color:'#475569'}
   ],
   trains:[
@@ -321,6 +324,9 @@ async function loadDB(){
       if(!DB.legend || !DB.legend.length || DB.legend.some(l=>l.key==='normal')){
         DB.legend = JSON.parse(JSON.stringify(INITIAL.legend));
       }
+      // complete(주기검수)는 항상 파란색 고정
+      const comp = DB.legend.find(l=>l.key==='complete');
+      if(comp){ comp.color='#3b82f6'; comp.name='주기검수'; }
     } else {
       DB = JSON.parse(JSON.stringify(INITIAL));
     }
@@ -525,6 +531,12 @@ function renderHeatmap(){
     if(isOpen) bh+=buildTimelineRows(train,dates);
   });
   document.querySelector('#heatmap-table tbody').innerHTML=bh;
+
+  // 14일 초과 조회 시 스크롤 맨 오른쪽(최근일)으로 이동
+  if(dates.length > 14){
+    const card = document.getElementById('heatmap-card');
+    card.scrollLeft = card.scrollWidth;
+  }
 }
 
 function buildTimelineRows(train,dates){
@@ -676,17 +688,20 @@ function loginAdmin(){isAdmin=true;document.getElementById('adminBtnHdr').classL
 function logoutAdmin(){if(!confirm('관리자 모드를 종료하시겠습니까?')) return;isAdmin=false;_ghToken='';document.getElementById('adminBtnHdr').classList.remove('on');document.getElementById('adminBtnHdr').textContent='🔒 관리자';document.querySelectorAll('.admin-shown').forEach(el=>{el.classList.remove('admin-shown');el.classList.add('admin-only');});document.getElementById('fab').style.display='none';render();}
 
 function openAdmTabs(){const tabs=[{id:'legend',name:'범례 관리'},{id:'data',name:'데이터 관리'},{id:'trains',name:'편성 관리'},{id:'locs',name:'고장위치 관리'}];document.getElementById('admTabs').innerHTML=tabs.map((t,i)=>`<button class="adm-tab ${i===0?'on':''}" onclick="switchAdmTab('${t.id}',this)">${t.name}</button>`).join('');renderLegendAdm();renderTrainAdm();renderLocAdm();}function renderLegendAdm(){
-  document.getElementById('legendAdmList').innerHTML=DB.legend.map((l,i)=>`
+  document.getElementById('legendAdmList').innerHTML=DB.legend.map((l,i)=>{
+    const isFixed = ['nodata','complete'].includes(l.key);
+    return `
     <div class="adm-list-item" style="gap:5px;">
       <div style="display:flex;flex-direction:column;gap:2px;">
         <button class="btn btn-ghost" style="padding:2px;font-size:8px;height:14px;line-height:1;" onclick="moveLegend(${i},-1)">▲</button>
         <button class="btn btn-ghost" style="padding:2px;font-size:8px;height:14px;line-height:1;" onclick="moveLegend(${i},1)">▼</button>
       </div>
-      <input type="text" value="${l.name}" placeholder="상태명" style="flex:1.5" data-field="name">
-      <input type="color" value="${l.color}" style="width:35px;padding:2px;height:28px;" data-field="color">
-      <input type="text" value="${l.key}" placeholder="Key" style="flex:1" data-field="key" ${['nodata'].includes(l.key)?'disabled':''}>
-      <button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="delLegendItem(${i})">삭제</button>
-    </div>`).join('');
+      <input type="text" value="${l.name}" placeholder="상태명" style="flex:1.5" data-field="name" ${isFixed?'disabled':''}>
+      <input type="color" value="${l.color}" style="width:35px;padding:2px;height:28px;" data-field="color" ${isFixed?'disabled':''}>
+      <input type="text" value="${l.key}" placeholder="Key" style="flex:1" data-field="key" disabled>
+      ${isFixed?`<span style="font-size:10px;color:var(--txt3);min-width:44px;text-align:center;">고정</span>`:`<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="delLegendItem(${i})">삭제</button>`}
+    </div>`;
+  }).join('');
 }
 function moveLegend(i, dir){
   const target = i + dir;
@@ -697,20 +712,26 @@ function moveLegend(i, dir){
   renderLegendAdm();
 }
 function addLegendItem(){DB.legend.push({key:'new_'+Date.now(),name:'신규상태',color:'#3b82f6'});renderLegendAdm();}
-function delLegendItem(i){if(DB.legend[i].key==='nodata'){alert('데이터없음 범례는 삭제할 수 없습니다.');return;}if(!confirm('이 범례를 삭제하시겠습니까?')) return;DB.legend.splice(i,1);renderLegendAdm();}
+function delLegendItem(i){if(['nodata','complete'].includes(DB.legend[i].key)){alert('이 범례는 삭제할 수 없습니다.');return;}if(!confirm('이 범례를 삭제하시겠습니까?')) return;DB.legend.splice(i,1);renderLegendAdm();}
 async function saveLegendAdm(){
   const arr=[];
   const items=document.querySelectorAll('#legendAdmList .adm-list-item');
   items.forEach((item, idx)=>{
     const inputs=item.querySelectorAll('input');
     const oldKey=DB.legend[idx]?.key;
-    const newKey=inputs[2].value.trim();
-    arr.push({name:inputs[0].value.trim(),color:inputs[1].value,key:newKey});
-    if(oldKey && oldKey !== newKey){
-      DB.events.forEach(e=>{if(e.status===oldKey) e.status=newKey;});
+    const isFixed = ['nodata','complete'].includes(oldKey);
+    // 고정 항목은 기존 값 그대로 유지
+    if(isFixed){
+      arr.push({...DB.legend[idx]});
+    } else {
+      const newKey=inputs[2].value.trim();
+      arr.push({name:inputs[0].value.trim(),color:inputs[1].value,key:newKey});
+      if(oldKey && oldKey !== newKey){
+        DB.events.forEach(e=>{if(e.status===oldKey) e.status=newKey;});
+      }
     }
   });
-  DB.legend=arr;await saveDB();renderLegendBar();render();closeModal('admModal');alert('범례 설정이 저장되었습니다.');
+  DB.legend=arr;await saveDB();render();closeModal('admModal');alert('범례 설정이 저장되었습니다.');
 }
 function switchAdmTab(id,btn){document.querySelectorAll('.adm-tab').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.adm-content').forEach(c=>c.classList.remove('show'));btn.classList.add('on');document.getElementById('adm-'+id).classList.add('show');}
 function renderTrainAdm(){document.getElementById('trainAdmList').innerHTML=DB.trains.map((t,i)=>`<div class="adm-list-item"><input type="text" value="${t}" data-i="${i}"><button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="delTrainItem(${i})">삭제</button></div>`).join('');}
@@ -829,8 +850,9 @@ function clearSearch(){document.getElementById('srchTrain').value='';document.ge
 function setPeriod(days){const today=new Date();const start=new Date(today);start.setDate(start.getDate()-days+1);document.getElementById('sDate').value=start.toISOString().split('T')[0];document.getElementById('eDate').value=today.toISOString().split('T')[0];document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pb'+days).classList.add('active');render();}
 function clearPeriodActive(){document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));}
 
-async function render(){await loadDB();renderLegendBar();renderFilters();renderHeatmap();if(selTrain) renderSummary();}
-document.addEventListener('DOMContentLoaded',async()=>{await loadDB();initDates();renderLegendBar();renderFilters();renderHeatmap();});
+function render(){renderLegendBar();renderFilters();renderHeatmap();if(selTrain) renderSummary();}
+async function reloadAndRender(){await loadDB();render();}
+document.addEventListener('DOMContentLoaded',async()=>{await loadDB();initDates();render();});
 </script>
 </body>
 </html>
