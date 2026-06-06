@@ -17,8 +17,8 @@
     },
     {
       "name": "주기검수",
-      "color": "#213cc4",
-      "key": "inspection"
+      "color": "#22c55e",
+      "key": "normal"
     },
     {
       "name": "조치완료",
@@ -26,7 +26,7 @@
       "key": "complete"
     },
     {
-      "name": "일반",
+      "name": "데이터없음",
       "color": "#475569",
       "key": "nodata"
     }
@@ -153,7 +153,7 @@
       ],
       "judge": [],
       "note": "",
-      "status": "inspection"
+      "status": "normal"
     },
     {
       "id": "e1780763372851dzq6",
@@ -235,7 +235,7 @@
       ],
       "judge": [],
       "note": "",
-      "status": "inspection"
+      "status": "normal"
     },
     {
       "id": "e1780763372851zojk",
@@ -266,7 +266,7 @@
       ],
       "judge": [],
       "note": "",
-      "status": "inspection"
+      "status": "normal"
     },
     {
       "id": "e1780763372851mgts",
@@ -278,7 +278,7 @@
       "checks": [],
       "judge": [],
       "note": "",
-      "status": "inspection"
+      "status": "normal"
     }
   ]
 }
