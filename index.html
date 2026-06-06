@@ -47,7 +47,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 #body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 #main-row{display:flex;flex:1;overflow:hidden;min-height:0;}
 #heatmap-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
-#heatmap-card{flex:1;overflow-x:auto;overflow-y:scroll;padding:0;}
+#heatmap-card{flex:1;overflow-x:auto;overflow-y:scroll;padding:0;scrollbar-gutter:stable;}
 #heatmap-table{border-collapse:collapse;table-layout:fixed;}
 #heatmap-table th,#heatmap-table td{border:1px solid var(--border);padding:0;text-align:center;vertical-align:middle;}
 #heatmap-table thead th{background:var(--card2);color:var(--txt2);font-size:11px;font-weight:600;padding:8px 4px;position:sticky;top:0;z-index:10;white-space:nowrap;}
@@ -205,9 +205,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 </head>
 <body>
 <div id="header">
-  <div style="display:flex;flex-direction:column;gap:1px;align-items:center;">
+  <div style="display:flex;flex-direction:column;gap:1px;align-items:center;text-align:center;">
     <span class="title">🚄 고속차량 정비이력 모니터링</span>
-    <span style="font-size:10px;color:var(--txt3);letter-spacing:.2px;">(부산철도차량정비단 경정비전기부)</span>
+    <span style="font-size:10px;color:var(--txt3);letter-spacing:.2px;width:100%;text-align:center;">(부산철도차량정비단 경정비전기부)</span>
   </div>
   <div class="fleet-filter-btns">
     <button class="fleet-btn fleet-btn-ktx active" id="fleetKTX" onclick="setFleetFilter('KTX')">KTX</button>
