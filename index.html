@@ -30,6 +30,8 @@ html,body{height:100%;width:100%;overflow:hidden;min-width:1100px;}
 body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI',sans-serif;font-size:13px;display:flex;flex-direction:column;}
 #header{height:var(--header-h);min-height:var(--header-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;overflow:hidden;white-space:nowrap;}
 #header .title{font-size:15px;font-weight:700;color:#fff;white-space:nowrap;letter-spacing:.3px;}
+#header [onclick="handleAdminBtn()"]:hover .title{color:var(--accent);}
+#header [onclick="handleAdminBtn()"]:hover{opacity:.85;}
 #header .sep{width:1px;height:28px;background:var(--border2);flex-shrink:0;}
 .hdr-grp{display:flex;align-items:center;gap:8px;}
 .hdr-grp label{font-size:11px;color:var(--txt2);white-space:nowrap;}
@@ -205,7 +207,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 </head>
 <body>
 <div id="header">
-  <div style="display:flex;flex-direction:column;gap:1px;align-items:center;text-align:center;">
+  <div style="display:flex;flex-direction:column;gap:1px;align-items:center;text-align:center;cursor:pointer;" onclick="handleAdminBtn()" title="관리자 메뉴">
     <span class="title">🚄 고속차량 정비이력 모니터링</span>
     <span style="font-size:10px;color:var(--txt3);letter-spacing:.2px;width:100%;text-align:center;">(부산철도차량정비단 경정비전기부)</span>
   </div>
@@ -213,6 +215,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
     <button class="fleet-btn fleet-btn-ktx active" id="fleetKTX" onclick="setFleetFilter('KTX')">KTX</button>
     <button class="fleet-btn fleet-btn-sr" id="fleetSR" onclick="setFleetFilter('SR')">SR</button>
   </div>
+  <div class="sep"></div>
+  <button class="expand-all-btn" id="expandAllBtn" onclick="toggleExpandAll()" title="전체 편성 펼치기/접기">전체보기 ▼</button>
+  <button class="icon-btn" title="통계" onclick="openModal('statModal')">📊</button>
   <div class="sep"></div>
   <div class="hdr-grp">
     <label>기간</label>
@@ -236,12 +241,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
   <div class="legend-bar" id="legendBar"></div>
   <div class="hdr-spacer"></div>
   <button class="icon-btn" title="검색" onclick="toggleSearch()">🔍</button>
-  <button class="expand-all-btn" id="expandAllBtn" onclick="toggleExpandAll()" title="전체 편성 펼치기/접기">전체보기 ▼</button>
-  <button class="icon-btn" title="통계" onclick="openModal('statModal')">📊</button>
   <button class="icon-btn admin-only" id="csvBtn" title="CSV 가져오기/내보내기" onclick="openModal('csvModal')">📥</button>
   <button class="icon-btn admin-only" id="setupBtn" title="시스템 설정" onclick="openModal('admModal')">⚙️</button>
-  <button class="icon-btn" title="새로고침" onclick="reloadAndRender()">⟳</button>
-  <button class="admin-btn" id="adminBtnHdr" onclick="handleAdminBtn()">🔒 관리자</button>
 </div>
 <div id="search-bar" style="display:none">
   <span style="font-size:11px;color:var(--txt3)">검색:</span>
