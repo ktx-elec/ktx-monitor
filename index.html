@@ -312,7 +312,7 @@ let _ghSha   = '';   // 파일 sha (업데이트 시 필요)
 async function loadDB(){
   try {
     // 캐시 방지용 timestamp
-    const res = await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${GH_FILE}?t=${Date.now()}`);
+    const res = await fetch(`https://cdn.jsdelivr.net/gh/${GH_OWNER}/${GH_REPO}@${GH_BRANCH}/${GH_FILE}?t=${Date.now()}`);
     if(res.ok){
       const data = await res.json();
       DB = data;
