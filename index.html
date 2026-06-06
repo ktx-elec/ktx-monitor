@@ -47,7 +47,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 #body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 #main-row{display:flex;flex:1;overflow:hidden;min-height:0;}
 #heatmap-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
-#heatmap-card{flex:1;overflow:auto;padding:0;}
+#heatmap-card{flex:1;overflow-x:auto;overflow-y:scroll;padding:0;}
 #heatmap-table{border-collapse:collapse;table-layout:fixed;}
 #heatmap-table th,#heatmap-table td{border:1px solid var(--border);padding:0;text-align:center;vertical-align:middle;}
 #heatmap-table thead th{background:var(--card2);color:var(--txt2);font-size:11px;font-weight:600;padding:8px 4px;position:sticky;top:0;z-index:10;white-space:nowrap;}
@@ -205,7 +205,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 </head>
 <body>
 <div id="header">
-  <div style="display:flex;flex-direction:column;gap:1px;">
+  <div style="display:flex;flex-direction:column;gap:1px;align-items:center;">
     <span class="title">🚄 고속차량 정비이력 모니터링</span>
     <span style="font-size:10px;color:var(--txt3);letter-spacing:.2px;">(부산철도차량정비단 경정비전기부)</span>
   </div>
@@ -276,7 +276,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 <div class="modal" id="evtModal"><div class="modal-box"><div class="modal-hd"><h2 id="evtModalTitle">이벤트 등록</h2><button class="x-btn" onclick="closeModal('evtModal')">×</button></div><div class="form-grid"><div class="form-row"><label>편성 *</label><select id="fTrain" class="form-select"></select></div><div class="form-row"><label>고장위치 *</label><select id="fLoc" class="form-select"></select></div><div class="form-row"><label>발생일 *</label><input id="fDate" type="date" class="form-input"></div><div class="form-row"><label>상태 *</label><select id="fStatus" class="form-select"></select></div><div class="form-row full"><label>현상 *</label><input id="fContent" class="form-input" placeholder="예) 자동차단"></div><div class="form-row full"><label>조치내역 *</label><input id="fAction" class="form-input" placeholder="예) 제어카드 교체"></div><div class="form-row full"><label>상세 점검내역 (선택)</label><textarea id="fChecks" class="form-textarea" placeholder="한 줄에 하나씩 입력"></textarea></div><div class="form-row full"><label>비고 (선택)</label><input id="fNote" class="form-input"></div></div><input type="hidden" id="fEditId"><div class="modal-foot"><button class="btn btn-danger" id="fDelBtn" style="display:none" onclick="deleteEvt()">삭제</button><button class="btn btn-ghost" onclick="closeModal('evtModal')">취소</button><button class="btn btn-primary" onclick="saveEvt()">저장</button></div></div></div>
 <div class="modal" id="admModal"><div class="modal-box wide"><div class="modal-hd"><h2>⚙️ 시스템 설정</h2><button class="x-btn" onclick="closeModal('admModal')">×</button></div><div class="adm-tabs" id="admTabs"></div><div class="adm-content show" id="adm-legend"><div id="legendAdmList"></div><button class="btn btn-success" style="margin-top:8px" onclick="addLegendItem()">+ 범례 추가</button><div class="modal-foot"><button class="btn btn-primary" onclick="saveLegendAdm()">저장</button></div></div><div class="adm-content" id="adm-data"><div style="font-size:12px;color:var(--txt2);margin-bottom:16px;line-height:1.6;">이벤트 데이터 관리 및 시스템 초기화 설정을 수행합니다.</div><div class="danger-zone"><h4>⚠️ 위험 구역</h4><div style="font-size:11px;color:var(--txt2);margin-bottom:10px;">아래 작업은 되돌릴 수 없습니다. 신중하게 사용하세요.</div><button class="btn btn-danger" onclick="resetAllEvents()">🗑️ 모든 이벤트 데이터 초기화</button></div></div><div class="adm-content" id="adm-trains"><div id="trainAdmList"></div><button class="btn btn-success" style="margin-top:8px" onclick="addTrainItem()">+ 편성 추가</button><div class="modal-foot"><button class="btn btn-primary" onclick="saveTrainAdm()">저장</button></div></div><div class="adm-content" id="adm-locs"><div id="locAdmList"></div><button class="btn btn-success" style="margin-top:8px" onclick="addLocItem()">+ 위치 추가</button><div class="modal-foot"><button class="btn btn-primary" onclick="saveLocAdm()">저장</button></div></div></div></div>
 <div class="modal" id="csvModal"><div class="modal-box wide"><div class="modal-hd"><h2>📥 CSV 가져오기</h2><button class="x-btn" onclick="closeModal('csvModal')">×</button></div><div class="drop-area" id="dropArea" onclick="document.getElementById('csvFileIn').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)"><div style="font-size:28px;margin-bottom:8px">📂</div><div>CSV 파일을 드래그하거나 클릭하여 선택</div><div style="font-size:11px;margin-top:6px;color:var(--txt3)">형식: 편성,고장위치,발생일,현상,조치내역,상세점검내역,상태</div><input type="file" id="csvFileIn" accept=".csv" style="display:none" onchange="handleCSVFile(this.files[0])"></div><div class="csv-opt-row" id="csvOptRow" style="display:none;"><label><input type="checkbox" id="csvReplaceAll"><span>기존 데이터 전체 삭제 후 등록 (가져오기 전 모든 이벤트를 삭제합니다)</span></label></div><div class="csv-preview" id="csvPreview"></div><div class="modal-foot"><button class="btn btn-ghost" onclick="exportCSV()" style="margin-right:auto">📤 CSV 내보내기</button><button class="btn btn-ghost" id="csvCancelBtn" onclick="closeModal('csvModal')">취소</button><button class="btn btn-primary" id="csvImportBtn" style="display:none" onclick="importCSV()">일괄 등록</button></div></div></div>
-<div class="modal" id="statModal"><div class="modal-box wide"><div class="modal-hd"><h2>📊 연간 통계</h2><button class="x-btn" onclick="closeModal('statModal')">×</button></div><div id="statYearLabel" style="font-size:12px;color:var(--txt3);margin-bottom:10px;"></div><div class="stat-grid" id="statGrid"></div><div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('statModal')">닫기</button></div></div></div>
+<div class="modal" id="statModal"><div class="modal-box wide"><div class="modal-hd"><h2>📊 연간 통계</h2><button class="x-btn" onclick="closeModal('statModal')">×</button></div><div style="display:flex;gap:6px;margin-bottom:12px;"><button class="fleet-btn fleet-btn-ktx active" id="statKTX" onclick="setStatFleet('KTX')">KTX</button><button class="fleet-btn fleet-btn-sr" id="statSR" onclick="setStatFleet('SR')">SR</button></div><div id="statYearLabel" style="font-size:12px;color:var(--txt3);margin-bottom:10px;"></div><div class="stat-grid" id="statGrid"></div><div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('statModal')">닫기</button></div></div></div>
 <div class="modal" id="pwModal"><div class="modal-box" style="max-width:380px"><div class="modal-hd"><h2 id="pwModalTitle">🔒 관리자 로그인</h2><button class="x-btn" onclick="closeModal('pwModal')">×</button></div><div style="margin-bottom:12px;font-size:12px;color:var(--txt2)">관리자 비밀번호와 GitHub 토큰을 입력하세요.</div><div style="margin-bottom:6px;font-size:11px;color:var(--txt3);font-weight:600;">비밀번호</div><input id="pwInput" type="password" class="form-input" style="width:100%;margin-bottom:12px" placeholder="비밀번호" onkeydown="if(event.key==='Enter')submitPw()"><div style="margin-bottom:6px;font-size:11px;color:var(--txt3);font-weight:600;">GitHub Token <span style="font-weight:400">(ghp_ 로 시작)</span></div><input id="ghTokenInput" type="password" class="form-input" style="width:100%;margin-bottom:8px" placeholder="ghp_xxxxxxxxxxxx" onkeydown="if(event.key==='Enter')submitPw()"><div id="pwError" style="color:#ef4444;font-size:11px;min-height:16px;margin-bottom:8px"></div><div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('pwModal')">취소</button><button class="btn btn-primary" onclick="submitPw()">확인</button></div></div></div>
 <button id="fab" class="admin-only" onclick="openEvtInput()" style="position:fixed;bottom:20px;right:20px;z-index:100;background:var(--accent);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,.5);display:none;align-items:center;justify-content:center;" title="이벤트 등록">＋</button>
 
@@ -794,12 +794,21 @@ async function importCSV(){
 function exportCSV(){const header='편성,고장위치,발생일,현상,조치내역,상세점검내역,상태';const rows=DB.events.map(e=>[e.train,e.loc,e.date,e.content,e.action,(e.checks||[]).join('/'),nameOf(e.status)].join(','));const bom='\uFEFF';const blob=new Blob([bom+header+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ktx_events.csv';a.click();}
 
 /* 통계 시스템 고도화 (v5) */
+let statFleet = 'KTX';
+function setStatFleet(fleet){
+  statFleet = fleet;
+  document.getElementById('statKTX').classList.toggle('active', fleet==='KTX');
+  document.getElementById('statSR').classList.toggle('active', fleet==='SR');
+  renderStat();
+}
 function renderStat(){
   const yr=getYearRange();
-  // 모든 집계에서 주기검수(complete) 제외
-  const yearEvts=DB.events.filter(e=>e.date>=yr.start&&e.date<=yr.end && e.status!=='complete');
+  // 편성 필터 적용
+  const isSR = (t) => String(t||'').trim().toUpperCase().includes('SR');
+  // 모든 집계에서 주기검수(complete) 제외 + fleet 필터
+  const yearEvts=DB.events.filter(e=>e.date>=yr.start&&e.date<=yr.end && e.status!=='complete' && (statFleet==='SR' ? isSR(e.train) : !isSR(e.train)));
   const y=new Date().getFullYear();
-  document.getElementById('statYearLabel').textContent=`집계 기간: ${y}년 1월 1일 ~ 12월 31일 (고장 총 ${yearEvts.length}건)`;
+  document.getElementById('statYearLabel').textContent=`집계 기간: ${y}년 1월 1일 ~ 12월 31일 (${statFleet} 고장 총 ${yearEvts.length}건)`;
 
   // 자동차단/보조블럭 차단 TOP (PC1/PC2 구분)
   const autoMap={};
@@ -843,7 +852,7 @@ function renderStat(){
   document.getElementById('statGrid').innerHTML=h;
 }
 
-function openModal(id){document.getElementById(id).classList.add('show');if(id==='admModal') openAdmTabs();if(id==='statModal') renderStat();}
+function openModal(id){document.getElementById(id).classList.add('show');if(id==='admModal') openAdmTabs();if(id==='statModal'){statFleet=fleetFilter;document.getElementById('statKTX').classList.toggle('active',statFleet==='KTX');document.getElementById('statSR').classList.toggle('active',statFleet==='SR');renderStat();}}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function toggleSearch(){const sb=document.getElementById('search-bar');sb.style.display=sb.style.display==='none'?'flex':'none';}
 function clearSearch(){document.getElementById('srchTrain').value='';document.getElementById('srchLoc').value='';document.getElementById('srchContent').value='';document.getElementById('srchStatus').value='';render();}
