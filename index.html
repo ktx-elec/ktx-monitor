@@ -243,6 +243,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
   <button class="icon-btn" title="검색" onclick="toggleSearch()">🔍</button>
   <button class="icon-btn admin-only" id="csvBtn" title="CSV 가져오기/내보내기" onclick="openModal('csvModal')">📥</button>
   <button class="icon-btn admin-only" id="setupBtn" title="시스템 설정" onclick="openModal('admModal')">⚙️</button>
+  <button class="admin-btn" id="adminBtnHdr" onclick="handleAdminBtn()">🔒 관리자</button>
 </div>
 <div id="search-bar" style="display:none">
   <span style="font-size:11px;color:var(--txt3)">검색:</span>
