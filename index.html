@@ -55,8 +55,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Malgun Gothic','Segoe UI
 #heatmap-table thead th{background:var(--card2);color:var(--txt2);font-size:11px;font-weight:600;padding:8px 4px;position:sticky;top:0;z-index:10;white-space:nowrap;}
 #heatmap-table thead th:first-child{z-index:11;position:sticky;left:0;top:0;}
 #heatmap-table thead th:nth-child(2){z-index:11;position:sticky;left:80px;top:0;}
-#heatmap-table tbody tr.hm-row td:first-child{position:sticky;left:0;background:var(--card2);z-index:5;font-weight:700;font-size:12px;padding:0 10px;white-space:nowrap;width:80px;cursor:pointer;border-right:2px solid var(--border2);text-align:center;}
-#heatmap-table tbody tr.hm-row td:nth-child(2){position:sticky;left:80px;background:var(--card2);z-index:5;width:80px;min-width:80px;padding:4px;text-align:center;}
+#heatmap-table tbody tr.hm-row td:first-child{position:sticky;left:0;background:var(--card2);z-index:5;font-weight:700;font-size:12px;padding:0 10px;white-space:nowrap;width:80px;min-width:80px;max-width:80px;cursor:pointer;border-right:2px solid var(--border2);text-align:center;}
+#heatmap-table tbody tr.hm-row td:nth-child(2){position:sticky;left:80px;background:var(--card2);z-index:5;width:80px;min-width:80px;max-width:80px;padding:4px;text-align:center;}
 #heatmap-table tbody tr.hm-row{height:36px;}
 #heatmap-table tbody tr.hm-row:hover td{background:var(--card2) !important;filter:brightness(1.1);}
 #heatmap-table tbody tr.hm-row.sel td:first-child{color:var(--accent) !important;}
@@ -500,10 +500,12 @@ function renderHeatmap(){
   trains=trains.filter(t=>getTrainSummary(t)!=='hidden');
 
   const availW=document.getElementById('heatmap-card').clientWidth||900;
-  const CELL_W=36; // 기간에 상관없이 셀 너비 고정
-  const fixedCols=160; // 편성+요약 열 너비
-  // 14일 이하일 땐 남은 공간을 균등 분배, 초과 시 고정 셀 크기
-  const cellW=dates.length<=14?Math.max(CELL_W,Math.floor((availW-fixedCols)/dates.length)):CELL_W;
+  // 14일 기준으로 셀/고정열 너비 고정 → 모든 기간(7일/14일/30일/수동) 동일한 셀 크기
+  // 14일 기준으로 셀 너비 고정 → 모든 기간 동일한 셀 크기
+  const fixedCols=160; // 편성+요약 열 너비 고정 80+80
+  // 14일 이하: 남은 공간 균등 분배(fixedCols 비율 유지) / 14일 초과: 14일 기준 셀 크기 고정
+  const cellW14=Math.floor((availW-fixedCols)/14);
+  const cellW=dates.length<=14?Math.floor((availW-fixedCols)/dates.length):cellW14;
   const tableW=Math.max(availW-2, fixedCols+cellW*dates.length);
 
   let hh=`<tr><th style="width:80px;min-width:80px;">편성 / 위치</th><th style="width:80px;min-width:80px;">요약(14일)</th>`;
@@ -559,10 +561,13 @@ function buildTimelineRows(train,dates){
       if(evts.length){
         let cellHtml = '';
         evts.forEach(e => {
+          const isJubak = e.content.includes('주박') || e.action.includes('주박') || e.loc.includes('주박');
+          const isKiji  = e.content.includes('기지') || e.action.includes('기지') || e.loc.includes('기지');
           const bg=colorOf(e.status)+'28';
-          cellHtml += `<div class="tl-evt-block" onclick="event.stopPropagation(); showEvtDetail('${e.id}')" style="background:${bg}; border-left: 3px solid ${colorOf(e.status)};">
+          const subStyle = isJubak ? 'color:#eab308;font-weight:700;' : isKiji ? 'color:#22c55e;font-weight:700;' : '';
+          cellHtml += `<div class="tl-evt-block" onclick="event.stopPropagation(); showEvtDetail('${e.id}')" style="background:${bg};border-left:3px solid ${colorOf(e.status)};">
             <span class="ct-txt">${e.content}</span>
-            <span class="sub-txt">${e.action.split('/')[0].trim()}</span>
+            <span class="sub-txt" style="${subStyle}">${e.action.split('/')[0].trim()}</span>
           </div>`;
         });
         rows+=`<td class="tl-detail-cell" style="padding: 2px !important;">${cellHtml}</td>`;
@@ -583,10 +588,13 @@ function buildTimelineRows(train,dates){
       if(evts.length){
         let cellHtml = '';
         evts.forEach(me => {
+          const isJubak = me.content.includes('주박') || me.action.includes('주박') || me.loc.includes('주박');
+          const isKiji  = me.content.includes('기지') || me.action.includes('기지') || me.loc.includes('기지');
           const bg=mc+'28';
-          cellHtml += `<div class="tl-evt-block" onclick="event.stopPropagation(); showEvtDetail('${me.id}')" style="background:${bg}; border-left: 3px solid ${mc};">
+          const subStyle = isJubak ? 'color:#eab308;font-weight:700;' : isKiji ? 'color:#22c55e;font-weight:700;' : '';
+          cellHtml += `<div class="tl-evt-block" onclick="event.stopPropagation(); showEvtDetail('${me.id}')" style="background:${bg};border-left:3px solid ${mc};">
             <span class="ct-txt" style="color:${mc};">${me.content}</span>
-            <span class="sub-txt">${me.action.split('/')[0].trim()}</span>
+            <span class="sub-txt" style="${subStyle}">${me.action.split('/')[0].trim()}</span>
           </div>`;
         });
         rows+=`<td class="tl-detail-cell tl-last-cell" style="padding: 2px !important;">${cellHtml}</td>`;
