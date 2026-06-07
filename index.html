@@ -474,6 +474,7 @@ function getTrainSummary(train){
   if(srchC) evts=evts.filter(e=>e.content.toLowerCase().includes(srchC));
   if(srchS) evts=evts.filter(e=>e.status===srchS);
   if((srchL||srchC||srchS)&&!evts.length) return 'hidden';
+  if(DB.events.filter(e=>e.train===train).length===0) return 'hidden';
   return 'visible';
 }
 
